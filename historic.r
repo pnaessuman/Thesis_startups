@@ -41,5 +41,5 @@ spruce_merged_2003 <- merge(spruce_df[spruce_df$year == 2003, ], climate_spruce[
 
 # Sort by the 3Rs (Recovery, Resistance, Resilience)
 
-
+beech_res <- res.comp(beech)
 
