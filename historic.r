@@ -3,6 +3,7 @@ library(treeclim)
 library(pointRes)
 
 source("External/Vs.R")
+source("External/lloret_indices.R")
 beech <- read.rwl("Data/buche_chrono.rwl")
 climate_beech <- read.csv2("Data/climate_bausenberg.csv")[, c(1, 2, 3, 6)]
 spruce <- read.rwl("Data/spruce_alpine.rwl")
