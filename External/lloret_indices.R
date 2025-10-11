@@ -49,11 +49,11 @@ resilience <- function(x, years, n = 3) {
 
 # USAGE EXAMPLE
 
-library(dplR)
+#library(dplR)
 
-beech <- read.rwl("data/buche_chrono.rwl")
+#beech <- read.rwl("data/buche_chrono.rwl")
 
-drought_years <- c(1976, 2003)
+#drought_years <- c(1976, 2003)
 
-resistance(beech, drought_years)
+#resistance(beech, drought_years)
 
