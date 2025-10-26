@@ -2,6 +2,9 @@ library(dplR)
 library(treeclim)
 library(pointRes)
 library(tidyverse)
+library(VSLiteR)
+library(ggplot2)
+library(DEoptim)
 
 source("External/Vs.R")
 source("External/lloret_indices.R")
@@ -123,4 +126,79 @@ ggplot(tree_metrics_2003, aes(x = Metric, y = Value, fill = Species)) +
 
 
 
+# Calibration Run & model forward for beech
 
+input_historic_b <- make_vsinput_historic(beech_c, climate_beech)
+
+beech_params <- vs_params(input_historic_b$trw,
+                           input_historic_b$tmean,
+                           input_historic_b$prec,
+                           input_historic_b$syear,
+                           input_historic_b$eyear,
+                           .phi = 50) # approx. latitude in degrees
+
+#Run model forward
+input_transient <- make_vsinput_transient(climate_beech)
+
+beech_forward <- vs_run_forward(beech_params,
+                                input_transient$tmean,
+                                input_transient$prec,
+                                input_transient$syear,
+                                input_transient$eyear,
+                                .phi = 50)
+
+#Compare the model and observation
+beech_observed <- data.frame(
+  year = as.numeric(rownames(beech_c)),
+  observed = scale(beech_c$std)
+)
+
+beech_combined <- merge(beech_observed, beech_forward)
+beech_combined$modelled <- scale(beech_combined$trw)
+beech_combined$trw <- NULL
+beech_combined <- tidyr::pivot_longer(beech_combined, -1, names_to = "variant",
+                                      values_to = "rwi")
+
+ggplot(beech_combined, aes(year, rwi)) +
+  geom_line(aes(colour = variant))
+
+
+# Calibration Run & model forward for spruce
+
+#Calibration Run
+input_historic_s <- make_vsinput_historic(spruce_c, climate_spruce)
+
+spruce_params <- vs_params(input_historic_s$trw,
+                           input_historic_s$temp,
+                           input_historic_s$prec,
+                           input_historic_s$syear,
+                           input_historic_s$eyear,
+                           .phi = 50) # approx. latitude in degrees
+
+#Run model forward
+input_transient_s <- make_vsinput_transient(climate_spruce)
+
+spruce_forward <- vs_run_forward(spruce_params,
+                                 input_transient_s$temp,
+                                 input_transient_s$prec,
+                                 input_transient_s$syear,
+                                 input_transient_s$eyear,
+                                 .phi = 50)
+
+#Compare the model and observation
+spruce_observed <- data.frame(
+  year = as.numeric(rownames(spruce_c)),
+  observed = scale(spruce_c$std)
+)
+
+spruce_combined <- merge(spruce_observed, spruce_forward)
+spruce_combined$modelled <- scale(spruce_combined$trw)
+spruce_combined$trw <- NULL
+spruce_combined <- tidyr::pivot_longer(spruce_combined, -1, names_to = "variant",
+                                       values_to = "rwi")
+
+ggplot(spruce_combined, aes(year, rwi)) +
+  geom_line(aes(colour = variant))
+
+cor (spruce_combined$rwi [spruce_combined$variant == "modelled"], 
+     spruce_combined$rwi [spruce_combined$variant == "observed"])
