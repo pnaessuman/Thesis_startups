@@ -202,3 +202,65 @@ ggplot(spruce_combined, aes(year, rwi)) +
 
 cor (spruce_combined$rwi [spruce_combined$variant == "modelled"], 
      spruce_combined$rwi [spruce_combined$variant == "observed"])
+
+
+rescale_to <- function(x, target) 
+{ (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE) * sd(target, na.rm = TRUE) + mean(target, na.rm = TRUE)}
+
+
+
+str(beech_c$year)
+class(beech_c$year)
+
+# Convert rownames (years) to a column
+beech_c$year <- as.numeric(rownames(beech_c))
+
+# Rename columns: td → std
+colnames(beech_c) <- c("std", "samp.depth", "year")
+
+# Check
+str(beech_c)
+head(beech_c)
+
+
+# Find overlapping years
+common_years_b <- intersect(beech_c$year, beech_forward$year)
+
+# Subset both datasets to the common years
+chron_subset_b <- beech_c %>% filter(year %in% common_years_b)
+forward_subset_b <- beech_forward %>% filter(year %in% common_years_b)
+
+# Rescale 
+beech_r <- rescale_to(forward_subset_b$trw, chron_subset_b$std)
+
+# Create a new data frame for forward with rescaled std
+beech_f <- data.frame(
+  year = common_years_b,
+  std  = beech_r
+)
+
+
+str(spruce_c)
+head(spruce_c)
+
+common_years_s <- intersect(spruce_c$year, spruce_forward$year)
+
+chron_subset_s <- spruce_c %>% filter(year %in% common_years_s)
+forward_subset_s <- spruce_forward %>% filter(year %in% common_years_s)
+
+# Rescale 
+spruce_r <- rescale_to(forward_subset_s$trw, chron_subset_s$std)
+
+# Create a new data frame for forward with rescaled std
+spruce_f <- data.frame(
+  year = common_years_s,
+  std  = spruce_r
+)
+
+drought_years <- c(1976, 2003)
+
+beech_vec <- setNames(beech_f$std, beech_f$year)
+
+beech_rst_f <- resistance(beech_vec, 1976) 
+
+k <- resistance(spruce_f, drought_years)
