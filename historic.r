@@ -243,6 +243,12 @@ beech_f <- data.frame(
 str(spruce_c)
 head(spruce_c)
 
+# Convert rownames (years) to a column
+spruce_c$year <- as.numeric(rownames(spruce_c))
+
+# Rename columns: td → std
+colnames(spruce_c) <- c("std", "samp.depth", "year")
+
 common_years_s <- intersect(spruce_c$year, spruce_forward$year)
 
 chron_subset_s <- spruce_c %>% filter(year %in% common_years_s)
@@ -259,8 +265,87 @@ spruce_f <- data.frame(
 
 drought_years <- c(1976, 2003)
 
-beech_vec <- setNames(beech_f$std, beech_f$year)
+# lloret Indices on Projections on Beeech and Spruce
 
-beech_rst_f <- resistance(beech_vec, 1976) 
+beech_rst_f <- resistance(beech_f, drought_years) 
+beech_rov_f <- recovery(beech_f, drought_years) 
+beech_rsl_f <- resilience(beech_f, drought_years)
 
-k <- resistance(spruce_f, drought_years)
+spruce_rst_f <- resistance(spruce_f, drought_years) 
+spruce_rov_f <- recovery(spruce_f, drought_years) 
+spruce_rsl_f <- resilience(spruce_f, drought_years)
+
+# Add species and index type to each dataframe
+beech_rst_f$species <- "Beech"
+beech_rst_f$index_type <- "Resistance"
+
+beech_rov_f$species <- "Beech" 
+beech_rov_f$index_type <- "Recovery"
+
+beech_rsl_f$species <- "Beech"
+beech_rsl_f$index_type <- "Resilience"
+
+spruce_rst_f$species <- "Spruce"
+spruce_rst_f$index_type <- "Resistance"
+
+spruce_rov_f$species <- "Spruce"
+spruce_rov_f$index_type <- "Recovery"
+
+spruce_rsl_f$species <- "Spruce"
+spruce_rsl_f$index_type <- "Resilience"
+
+# Combine all data
+lloret_combined <- bind_rows(
+  beech_rst_f, beech_rov_f, beech_rsl_f,
+  spruce_rst_f, spruce_rov_f, spruce_rsl_f
+)
+
+print(lloret_combined)
+print(str(lloret_combined))
+
+# Plot for 1976
+ lloret_combined %>%
+  filter(year == 1976) %>%
+  ggplot(aes(x = index_type, y = index, fill = species)) +
+  geom_boxplot(alpha = 0.7, position = position_dodge(0.8)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.8), 
+             alpha = 0.6, size = 2) +
+  labs(
+    title = "Drought Year 1976 - Model Forward",
+    subtitle = "Beech vs Spruce",
+    x = "Lloret Index",
+    y = "Index Value",
+    fill = "Species"
+  ) +
+  scale_fill_manual(values = c("Beech" = "#1b9e77", "Spruce" = "#d95f02")) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text = element_text(size = 10)
+  )
+
+
+# Plot for 2003
+ lloret_combined %>%
+  filter(year == 2003) %>%
+  ggplot(aes(x = index_type, y = index, fill = species)) +
+  geom_boxplot(alpha = 0.7, position = position_dodge(0.8)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.8), 
+             alpha = 0.6, size = 2) +
+  labs(
+    title = "Drought Year 2003 - Model Forward",
+    subtitle = "Beech vs Spruce",
+    x = "Lloret Index",
+    y = "Index Value",
+    fill = "Species"
+  ) +
+  scale_fill_manual(values = c("Beech" = "#1b9e77", "Spruce" = "#d95f02")) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text = element_text(size = 10)
+  )
+
+print(plot_2003)

@@ -4,18 +4,18 @@
 # Resilience = PostDr / PreDr
 
 res_dr <- function(x, years) {
-  x[as.numeric(rownames(x)) %in% years, ]
+  x[x$year %in% years, ]$std
 }
 
 res_predr <- function(x, years, n = 3) {
   sapply(years, function(y) {
-    mean(x[as.numeric(rownames(x)) %in% c((y - n):(y - 1)), ])
+    mean(x[x$year %in% c((y - n):(y - 1)), ]$std)
   })
 }
 
 res_postdr <- function(x, years, n = 3) {
   sapply(years, function(y) {
-    mean(x[as.numeric(rownames(x)) %in% c((y + n):(y + 1)), ])
+    mean(x[x$year %in% c((y + n):(y + 1)), ]$std)
   })
 }
 
