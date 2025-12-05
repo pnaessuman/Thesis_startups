@@ -9,15 +9,18 @@ library(DEoptim)
 source("External/Vs.R")
 source("External/lloret_indices.R")
 beech <- read.rwl("Data/bausenberg_beech.rwl")
+oak <- read.rwl("Data/bausenberg_oak.rwl")
 climate_beech <- read.csv2("Data/climate_bausenberg.csv")[, c(1, 2, 3, 6)]
 spruce <- read.rwl("Data/alpine_spruce_trees.rwl")
 climate_spruce <- read.csv2("Data/climate_alpine.csv")
 
 beech_d <- detrend(beech, method = "Spline", nyrs = 32)
 spruce_d <- detrend(spruce, method = "Spline", nyrs = 32)
+oak_d <- detrend(oak, method = "Spline", nyrs = 32)
 
 beech_c <- chron(beech_d)
 spruce_c <- chron(spruce_d)
+oak_c <- chron(oak_d)
 
 plot(beech_c)
 
@@ -33,17 +36,20 @@ climate_years_s <- climate_spruce[climate_spruce$year %in% c(1976, 2003), ]
 
 beech_df <- data.frame(year = as.numeric(rownames(beech_c)), rwi = beech_c$std)
 spruce_df <- data.frame(year = as.numeric(rownames(spruce_c)), rwi = spruce_c$std)
+oak_df <- data.frame(year = as.numeric(rownames(oak_c)), rwi = oak_c$std)
 
 # Merge Tree-Ring Data with Climate Data
 # 1976
 
 beech_merged_1976 <- merge(beech_df[beech_df$year == 1976, ], climate_beech[climate_beech$year == 1976, ], by = "year")
 spruce_merged_1976 <- merge(spruce_df[spruce_df$year == 1976, ], climate_spruce[climate_spruce$year == 1976, ], by = "year")
+oak_merged_1976 <- merge(oak_df[oak_df$year == 1976, ], climate_beech[climate_beech$year == 1976, ], by = "year")
 
 # 2003
 
 beech_merged_2003 <- merge(beech_df[beech_df$year == 2003, ], climate_beech[climate_beech$year == 2003, ], by = "year")
 spruce_merged_2003 <- merge(spruce_df[spruce_df$year == 2003, ], climate_spruce[climate_spruce$year == 2003, ], by = "year")
+oak_merged_2003 <- merge(oak_df[oak_df$year == 2003, ], climate_beech[climate_beech$year == 2003, ], by = "year")
 
 # Sort by the 3Rs (Recovery, Resistance, Resilience)
 
@@ -74,6 +80,19 @@ spruce_resist_2003 <- resist_s[spruce_years == 2003, ]
 spruce_recov_2003 <- recov_s[spruce_years == 2003, ] 
 spruce_resil_2003 <- resil_s[spruce_years == 2003, ] 
 
+oak_res <- res.comp(oak_d)
+resist_o <- oak_res$resist
+recov_o <- oak_res$recov
+resil_o <- oak_res$resil
+oak_years <- as.numeric(rownames(resist_o))
+oak_resist_1976 <- resist_o[oak_years == 1976, ] 
+oak_recov_1976 <- recov_o[oak_years == 1976, ]
+oak_resil_1976 <- resil_o[oak_years == 1976, ]
+
+oak_resist_2003 <- resist_o[oak_years == 2003, ] 
+oak_recov_2003 <- recov_o[oak_years == 2003, ] 
+oak_resil_2003 <- resil_o[oak_years == 2003, ] 
+
 
 library(tidyverse)
 
@@ -86,6 +105,14 @@ tree_metrics_1976 <- bind_rows(
   tibble(Species = "Spruce", Metric = "Resistance", Value = spruce_resist_1976),
   tibble(Species = "Spruce", Metric = "Recovery",   Value = spruce_recov_1976),
   tibble(Species = "Spruce", Metric = "Resilience", Value = spruce_resil_1976))
+
+tree_m_1976 <- bind_rows(
+  tibble(Species = "Beech", Metric = "Resistance", Value = beech_resist_1976),
+  tibble(Species = "Beech", Metric = "Recovery",   Value = beech_recov_1976),
+  tibble(Species = "Beech", Metric = "Resilience", Value = beech_resil_1976),
+  tibble(Species = "Oak", Metric = "Resistance", Value = oak_resist_1976),
+  tibble(Species = "Oak", Metric = "Recovery",   Value = oak_recov_1976),
+  tibble(Species = "Oak", Metric = "Resilience", Value = oak_resil_1976))
 
 ggplot(tree_metrics_1976, aes(x = Metric, y = Value, fill = Species)) +
   geom_boxplot(outlier.shape = 16, alpha = 0.7) +
@@ -101,6 +128,19 @@ ggplot(tree_metrics_1976, aes(x = Metric, y = Value, fill = Species)) +
     legend.position = "top"
   )
 
+ggplot(tree_m_1976, aes(x = Metric, y = Value, fill = Species)) +
+  geom_boxplot(outlier.shape = 16, alpha = 0.7) +
+  labs(
+    title = "Comparison of Drought Response (1976)",
+    x = "Drought Metric",
+    y = "Value",
+    fill = "Species"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "top"
+  )
 
 tree_metrics_2003 <- bind_rows(
   tibble(Species = "Beech", Metric = "Resistance", Value = beech_resist_2003),
@@ -109,6 +149,14 @@ tree_metrics_2003 <- bind_rows(
   tibble(Species = "Spruce", Metric = "Resistance", Value = spruce_resist_2003),
   tibble(Species = "Spruce", Metric = "Recovery",   Value = spruce_recov_2003),
   tibble(Species = "Spruce", Metric = "Resilience", Value = spruce_resil_2003))
+
+tree_m_2003 <- bind_rows(
+  tibble(Species = "Beech", Metric = "Resistance", Value = beech_resist_2003),
+  tibble(Species = "Beech", Metric = "Recovery",   Value = beech_recov_2003),
+  tibble(Species = "Beech", Metric = "Resilience", Value = beech_resil_2003),
+  tibble(Species = "Oak", Metric = "Resistance", Value = oak_resist_2003),
+  tibble(Species = "Oak", Metric = "Recovery",   Value = oak_recov_2003),
+  tibble(Species = "Oak", Metric = "Resilience", Value = oak_resil_2003))
 
 ggplot(tree_metrics_2003, aes(x = Metric, y = Value, fill = Species)) +
   geom_boxplot(outlier.shape = 16, alpha = 0.7) +
@@ -124,7 +172,19 @@ ggplot(tree_metrics_2003, aes(x = Metric, y = Value, fill = Species)) +
     legend.position = "top"
   )
 
-
+ggplot(tree_m_2003, aes(x = Metric, y = Value, fill = Species)) +
+  geom_boxplot(outlier.shape = 16, alpha = 0.7) +
+  labs(
+    title = "Comparison of Drought Response (2003)",
+    x = "Drought Metric",
+    y = "Value",
+    fill = "Species"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "top"
+  )
 
 # Calibration Run & model forward for beech
 
@@ -349,3 +409,56 @@ print(str(lloret_combined))
   )
 
 print(plot_2003)
+
+#######
+# working without chronology
+
+input_historic_be <- make_vsinput_historic(beech, climate_beech)
+
+beech_params2 <- vs_params(input_historic_be$trw,
+                          input_historic_be$tmean,
+                          input_historic_be$prec,
+                          input_historic_be$syear,
+                          input_historic_be$eyear,
+                          .phi = 50) # approx. latitude in degrees
+
+#Run model forward
+input_transient <- make_vsinput_transient(climate_beech)
+
+beech_forward2 <- vs_run_forward(beech_params2,
+                                input_transient$tmean,
+                                input_transient$prec,
+                                input_transient$syear,
+                                input_transient$eyear,
+                                .phi = 50)
+
+
+input_historic_o <- make_vsinput_historic(oak, climate_beech)
+
+oak_params <- vs_params(input_historic_o$trw,
+                           input_historic_o$tmean,
+                           input_historic_o$prec,
+                           input_historic_o$syear,
+                           input_historic_o$eyear,
+                           .phi = 50) # approx. latitude in degrees
+
+#Run model forward
+input_transient <- make_vsinput_transient(climate_beech)
+
+oak_forward <- vs_run_forward(oak_params,
+                                 input_transient$tmean,
+                                 input_transient$prec,
+                                 input_transient$syear,
+                                 input_transient$eyear,
+                                 .phi = 50)
+
+
+str(beech$year)
+class(beech$year)
+
+
+beech_1 <- beech %>% 
+  na.omit()
+
+oak_1 <- oak %>% 
+  na.omit()
