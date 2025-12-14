@@ -12,10 +12,13 @@ beech <- read.rwl("Data/bausenberg_beech.rwl")
 oak <- read.rwl("Data/bausenberg_oak.rwl")
 climate <- read.csv2("Data/climate_bausenberg.csv")[, c(1, 2, 3, 6)]
 
-beech_1 <- beech %>% 
+Beech_d <- detrend(beech, method = "Spline", nyrs = 32)
+Oak_d <- detrend(oak, method = "Spline", nyrs = 32)
+
+beech_1 <- Beech_d %>% 
   na.omit()
 
-oak_1 <- oak %>% 
+oak_1 <- oak_d %>% 
   na.omit()
 
 beech_1$Beech_05
@@ -43,7 +46,7 @@ ls(pattern = "_df$")
 
 # Check one of them
 head(Oak_01_df)
-
+head(climate)
 
 # Get the years from row names
 years <- as.numeric(rownames(beech_1))
@@ -68,22 +71,23 @@ head(Beech_01_df)
 
 drought_years <- c(1976, 2003)
 
-# Comparison of Drought Response 1976 and 2003
-Beech_01_r <- resistance(Beech_01_df, drought_years)
-Beech_02_r <- resistance(Beech_02_df, drought_years)
-Beech_03_r <- resistance(Beech_03_df, drought_years)
-Beech_04_r <- resistance(Beech_04_df, drought_years)
-Beech_05_r <- resistance(Beech_05_df, drought_years)
-Beech_06_r <- resistance(Beech_06_df, drought_years)
-Beech_07_r <- resistance(Beech_07_df, drought_years)
-Beech_08_r <- resistance(Beech_08_df, drought_years)
-Beech_09_r <- resistance(Beech_09_df, drought_years)
-Beech_10_r <- resistance(Beech_10_df, drought_years)
-Beech_11_r <- resistance(Beech_11_df, drought_years)
-Beech_12_r <- resistance(Beech_12_df, drought_years)
-Beech_13_r <- resistance(Beech_13_df, drought_years)
-Beech_14_r <- resistance(Beech_14_df, drought_years)
-Beech_15_r <- resistance(Beech_15_df, drought_years)
+# Comparison of Drought Response 1976 and 2003 (Beech)
+
+Beech_01_res <- resistance(Beech_01_df, drought_years)
+Beech_02_res <- resistance(Beech_02_df, drought_years)
+Beech_03_res <- resistance(Beech_03_df, drought_years)
+Beech_04_res <- resistance(Beech_04_df, drought_years)
+Beech_05_res <- resistance(Beech_05_df, drought_years)
+Beech_06_res <- resistance(Beech_06_df, drought_years)
+Beech_07_res <- resistance(Beech_07_df, drought_years)
+Beech_08_res <- resistance(Beech_08_df, drought_years)
+Beech_09_res <- resistance(Beech_09_df, drought_years)
+Beech_10_res <- resistance(Beech_10_df, drought_years)
+Beech_11_res <- resistance(Beech_11_df, drought_years)
+Beech_12_res <- resistance(Beech_12_df, drought_years)
+Beech_13_res <- resistance(Beech_13_df, drought_years)
+Beech_14_res <- resistance(Beech_14_df, drought_years)
+Beech_15_res <- resistance(Beech_15_df, drought_years)
 
 
 Beech_01_rsl <- resilience(Beech_01_df, drought_years)
@@ -119,22 +123,22 @@ Beech_13_rec <- recovery(Beech_13_df, drought_years)
 Beech_14_rec <- recovery(Beech_14_df, drought_years)
 Beech_15_rec <- recovery(Beech_15_df, drought_years)
 
+# Comparison of Drought Response 1976 and 2003 (Oak)
 
-
-Oak_01_r <- resistance(Oak_01_df, drought_years)
-Oak_02_r <- resistance(Oak_02_df, drought_years)
-Oak_03_r <- resistance(Oak_03_df, drought_years)
-Oak_04_r <- resistance(Oak_04_df, drought_years)
-Oak_05_r <- resistance(Oak_05_df, drought_years)
-Oak_06_r <- resistance(Oak_06_df, drought_years)
-Oak_07_r <- resistance(Oak_07_df, drought_years)
-Oak_08_r <- resistance(Oak_08_df, drought_years)
-Oak_09_r <- resistance(Oak_09_df, drought_years)
-Oak_10_r <- resistance(Oak_10_df, drought_years)
-Oak_12_r <- resistance(Oak_12_df, drought_years)
-Oak_13_r <- resistance(Oak_13_df, drought_years)
-Oak_14_r <- resistance(Oak_14_df, drought_years)
-Oak_15_r <- resistance(Oak_15_df, drought_years)
+Oak_01_res <- resistance(Oak_01_df, drought_years)
+Oak_02_res <- resistance(Oak_02_df, drought_years)
+Oak_03_res <- resistance(Oak_03_df, drought_years)
+Oak_04_res <- resistance(Oak_04_df, drought_years)
+Oak_05_res <- resistance(Oak_05_df, drought_years)
+Oak_06_res <- resistance(Oak_06_df, drought_years)
+Oak_07_res <- resistance(Oak_07_df, drought_years)
+Oak_08_res <- resistance(Oak_08_df, drought_years)
+Oak_09_res <- resistance(Oak_09_df, drought_years)
+Oak_10_res <- resistance(Oak_10_df, drought_years)
+Oak_12_res <- resistance(Oak_12_df, drought_years)
+Oak_13_res <- resistance(Oak_13_df, drought_years)
+Oak_14_res <- resistance(Oak_14_df, drought_years)
+Oak_15_res <- resistance(Oak_15_df, drought_years)
 
 
 Oak_01_rsl <- resilience(Oak_01_df, drought_years)
@@ -169,14 +173,10 @@ Oak_14_rec <- recovery(Oak_14_df, drought_years)
 Oak_15_rec <- recovery(Oak_15_df, drought_years)
 
 
-
-
-
-
 # VS-Lite model run
 
 estimate_params <- function(chronology, climate_data, phi = 50, .iter = 200){
-  input_historic <- make_vsinput_historic(chronology, climate_data)
+  input_historic <- make_vsinput_historic_indiv(chronology, climate_data)
   
   params <- vs_params(
     input_historic$std,
@@ -219,5 +219,261 @@ run_vslite_forward <- function(params, climate_data, phi = 50, .iter = 200) {
 # Beech
 
 Beech_01_p <- estimate_params(Beech_01_df, climate, .iter = 200)
+Beech_01_f <- run_vslite_forward(Beech_01_p, climate)
+
+Beech_02_p <- estimate_params(Beech_02_df, climate, .iter = 200)
+Beech_02_f <- run_vslite_forward(Beech_02_p, climate)
+
+Beech_03_p <- estimate_params(Beech_03_df, climate, .iter = 200)
+Beech_03_f <- run_vslite_forward(Beech_03_p, climate)
+
+Beech_04_p <- estimate_params(Beech_04_df, climate, .iter = 200)
+Beech_04_f <- run_vslite_forward(Beech_04_p, climate)
+
+Beech_05_p <- estimate_params(Beech_05_df, climate, .iter = 200)
+Beech_05_f <- run_vslite_forward(Beech_05_p, climate)
+
+Beech_06_p <- estimate_params(Beech_06_df, climate, .iter = 200)
+Beech_06_f <- run_vslite_forward(Beech_06_p, climate)
+
+Beech_07_p <- estimate_params(Beech_07_df, climate, .iter = 200)
+Beech_07_f <- run_vslite_forward(Beech_07_p, climate)
+
+Beech_08_p <- estimate_params(Beech_08_df, climate, .iter = 200)
+Beech_08_f <- run_vslite_forward(Beech_08_p, climate)
+
+Beech_09_p <- estimate_params(Beech_09_df, climate, .iter = 200)
+Beech_09_f <- run_vslite_forward(Beech_09_p, climate)
+
+Beech_10_p <- estimate_params(Beech_10_df, climate, .iter = 200)
+Beech_10_f <- run_vslite_forward(Beech_10_p, climate)
+
+Beech_11_p <- estimate_params(Beech_11_df, climate, .iter = 200)
+Beech_11_f <- run_vslite_forward(Beech_11_p, climate)
+
+Beech_12_p <- estimate_params(Beech_12_df, climate, .iter = 200)
+Beech_12_f <- run_vslite_forward(Beech_12_p, climate)
+
+Beech_13_p <- estimate_params(Beech_13_df, climate, .iter = 200)
+Beech_13_f <- run_vslite_forward(Beech_13_p, climate)
+
+Beech_14_p <- estimate_params(Beech_14_df, climate, .iter = 200)
+Beech_14_f <- run_vslite_forward(Beech_14_p, climate)
+
+Beech_15_p <- estimate_params(Beech_15_df, climate, .iter = 200)
+Beech_15_f <- run_vslite_forward(Beech_15_p, climate)
+
+# Oak
+
+Oak_01_p <- estimate_params(Oak_01_df, climate, .iter = 200)
+Oak_01_f <- run_vslite_forward(Oak_01_p, climate)
+
+Oak_02_p <- estimate_params(Oak_02_df, climate, .iter = 200)
+Oak_02_f <- run_vslite_forward(Oak_02_p, climate)
+
+Oak_03_p <- estimate_params(Oak_03_df, climate, .iter = 200)
+Oak_03_f <- run_vslite_forward(Oak_03_p, climate)
+
+Oak_04_p <- estimate_params(Oak_04_df, climate, .iter = 200)
+Oak_04_f <- run_vslite_forward(Oak_04_p, climate)
+
+Oak_05_p <- estimate_params(Oak_05_df, climate, .iter = 200)
+Oak_05_f <- run_vslite_forward(Oak_05_p, climate)
+
+Oak_06_p <- estimate_params(Oak_06_df, climate, .iter = 200)
+Oak_06_f <- run_vslite_forward(Oak_06_p, climate)
+
+Oak_07_p <- estimate_params(Oak_07_df, climate, .iter = 200)
+Oak_07_f <- run_vslite_forward(Oak_07_p, climate)
+
+Oak_08_p <- estimate_params(Oak_08_df, climate, .iter = 200)
+Oak_08_f <- run_vslite_forward(Oak_08_p, climate)
+
+Oak_09_p <- estimate_params(Oak_09_df, climate, .iter = 200)
+Oak_09_f <- run_vslite_forward(Oak_09_p, climate)
+
+Oak_10_p <- estimate_params(Oak_10_df, climate, .iter = 200)
+Oak_10_f <- run_vslite_forward(Oak_10_p, climate)
+
+Oak_12_p <- estimate_params(Oak_12_df, climate, .iter = 200)
+Oak_12_f <- run_vslite_forward(Oak_12_p, climate)
+
+Oak_13_p <- estimate_params(Oak_13_df, climate, .iter = 200)
+Oak_13_f <- run_vslite_forward(Oak_13_p, climate)
+
+Oak_14_p <- estimate_params(Oak_14_df, climate, .iter = 200)
+Oak_14_f <- run_vslite_forward(Oak_14_p, climate)
+
+Oak_15_p <- estimate_params(Oak_15_df, climate, .iter = 200)
+Oak_15_f <- run_vslite_forward(Oak_15_p, climate)
+
+
+#Rescaling forward data and make it ready for lloret indices
+
+rescale_to <- function(x, target) 
+{ (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE) * sd(target, na.rm = TRUE) + mean(target, na.rm = TRUE)}
+
+
+rescale_df <- function(ref_df, fwd_df) {
+  
+  # Find overlapping years
+  common_years <- intersect(ref_df$year, fwd_df$year)
+  
+  # Subset both datasets to the common years
+  ref_subset <- ref_df %>% filter(year %in% common_years)
+  fwd_subset <- fwd_df %>% filter(year %in% common_years)
+  
+  # Ensure they're in the same order (by year)
+  ref_subset <- ref_subset %>% arrange(year)
+  fwd_subset <- fwd_subset %>% arrange(year)
+  
+  # Rescale forward projected_growth to match reference std
+  # Using simple z-score rescaling
+  fwd_scaled <- scale(fwd_subset$projected_growth)
+  rescaled_std <- as.numeric(fwd_scaled * sd(ref_subset$std) + mean(ref_subset$std))
+  
+  # Create the exact output format you requested
+  result_df <- data.frame(
+    year = common_years,
+    std = rescaled_std
+  )
+  
+  return(result_df)
+}
+
+Beech_01_r <- rescale_df(Beech_01_df, Beech_01_f)
+Beech_02_r <- rescale_df(Beech_02_df, Beech_02_f)
+Beech_03_r <- rescale_df(Beech_03_df, Beech_03_f)
+Beech_04_r <- rescale_df(Beech_04_df, Beech_04_f)
+Beech_05_r <- rescale_df(Beech_05_df, Beech_05_f)
+Beech_06_r <- rescale_df(Beech_06_df, Beech_06_f)
+Beech_07_r <- rescale_df(Beech_07_df, Beech_07_f)
+Beech_08_r <- rescale_df(Beech_08_df, Beech_08_f)
+Beech_09_r <- rescale_df(Beech_09_df, Beech_09_f)
+Beech_10_r <- rescale_df(Beech_10_df, Beech_10_f)
+Beech_11_r <- rescale_df(Beech_11_df, Beech_11_f)
+Beech_12_r <- rescale_df(Beech_12_df, Beech_12_f)
+Beech_13_r <- rescale_df(Beech_13_df, Beech_13_f)
+Beech_14_r <- rescale_df(Beech_14_df, Beech_14_f)
+Beech_15_r <- rescale_df(Beech_15_df, Beech_15_f)
+
+Oak_01_r <- rescale_df(Oak_01_df, Oak_01_f)
+Oak_02_r <- rescale_df(Oak_02_df, Oak_02_f)
+Oak_03_r <- rescale_df(Oak_03_df, Oak_03_f)
+Oak_04_r <- rescale_df(Oak_04_df, Oak_04_f)
+Oak_05_r <- rescale_df(Oak_05_df, Oak_05_f)
+Oak_06_r <- rescale_df(Oak_06_df, Oak_06_f)
+Oak_07_r <- rescale_df(Oak_07_df, Oak_07_f)
+Oak_08_r <- rescale_df(Oak_08_df, Oak_08_f)
+Oak_09_r <- rescale_df(Oak_09_df, Oak_09_f)
+Oak_10_r <- rescale_df(Oak_10_df, Oak_10_f)
+Oak_12_r <- rescale_df(Oak_12_df, Oak_12_f)
+Oak_13_r <- rescale_df(Oak_13_df, Oak_13_f)
+Oak_14_r <- rescale_df(Oak_14_df, Oak_14_f)
+Oak_15_r <- rescale_df(Oak_15_df, Oak_15_f)
+
+
+# Run lloret Indices for the Rescaled forward data
+# Comparison of Drought Response 1976 and 2003 (Beech Forward)
+
+Beech_01_res_f <- resistance(Beech_01_r, drought_years)
+Beech_02_res_f <- resistance(Beech_02_r, drought_years)
+Beech_03_res_f <- resistance(Beech_03_r, drought_years)
+Beech_04_res_f <- resistance(Beech_04_r, drought_years)
+Beech_05_res_f <- resistance(Beech_05_r, drought_years)
+Beech_06_res_f <- resistance(Beech_06_r, drought_years)
+Beech_07_res_f <- resistance(Beech_07_r, drought_years)
+Beech_08_res_f <- resistance(Beech_08_r, drought_years)
+Beech_09_res_f <- resistance(Beech_09_r, drought_years)
+Beech_10_res_f <- resistance(Beech_10_r, drought_years)
+Beech_11_res_f <- resistance(Beech_11_r, drought_years)
+Beech_12_res_f <- resistance(Beech_12_r, drought_years)
+Beech_13_res_f <- resistance(Beech_13_r, drought_years)
+Beech_14_res_f <- resistance(Beech_14_r, drought_years)
+Beech_15_res_f <- resistance(Beech_15_r, drought_years)
+
+
+Beech_01_rsl_f <- resilience(Beech_01_r, drought_years)
+Beech_02_rsl_f <- resilience(Beech_02_r, drought_years)
+Beech_03_rsl_f <- resilience(Beech_03_r, drought_years)
+Beech_04_rsl_f <- resilience(Beech_04_r, drought_years)
+Beech_05_rsl_f <- resistance(Beech_05_r, drought_years)
+Beech_06_rsl_f <- resilience(Beech_06_r, drought_years)
+Beech_07_rsl_f <- resilience(Beech_07_r, drought_years)
+Beech_08_rsl_f <- resilience(Beech_08_r, drought_years)
+Beech_09_rsl_f <- resilience(Beech_09_r, drought_years)
+Beech_10_rsl_f <- resilience(Beech_10_r, drought_years)
+Beech_11_rsl_f <- resilience(Beech_11_r, drought_years)
+Beech_12_rsl_f <- resilience(Beech_12_r, drought_years)
+Beech_13_rsl_f <- resilience(Beech_13_r, drought_years)
+Beech_14_rsl_f <- resilience(Beech_14_r, drought_years)
+Beech_15_rsl_f <- resilience(Beech_15_r, drought_years)
+
+
+Beech_01_rec_f <- recovery(Beech_01_r, drought_years)
+Beech_02_rec_f <- recovery(Beech_02_r, drought_years)
+Beech_03_rec_f <- recovery(Beech_03_r, drought_years)
+Beech_04_rec_f <- recovery(Beech_04_r, drought_years)
+Beech_05_rec_f <- recovery(Beech_05_r, drought_years)
+Beech_06_rec_f <- recovery(Beech_06_r, drought_years)
+Beech_07_rec_f <- recovery(Beech_07_r, drought_years)
+Beech_08_rec_f <- recovery(Beech_08_r, drought_years)
+Beech_09_rec_f <- recovery(Beech_09_r, drought_years)
+Beech_10_rec_f <- recovery(Beech_10_r, drought_years)
+Beech_11_rec_f <- recovery(Beech_11_r, drought_years)
+Beech_12_rec_f <- recovery(Beech_12_r, drought_years)
+Beech_13_rec_f <- recovery(Beech_13_r, drought_years)
+Beech_14_rec_f <- recovery(Beech_14_r, drought_years)
+Beech_15_rec_f <- recovery(Beech_15_r, drought_years)
+
+# Comparison of Drought Response 1976 and 2003 (Oak Forward)
+
+Oak_01_res_f <- resistance(Oak_01_r, drought_years)
+Oak_02_res_f <- resistance(Oak_02_r, drought_years)
+Oak_03_res_f <- resistance(Oak_03_r, drought_years)
+Oak_04_res_f <- resistance(Oak_04_r, drought_years)
+Oak_05_res_f <- resistance(Oak_05_r, drought_years)
+Oak_06_res_f <- resistance(Oak_06_r, drought_years)
+Oak_07_res_f <- resistance(Oak_07_r, drought_years)
+Oak_08_res_f <- resistance(Oak_08_r, drought_years)
+Oak_09_res_f <- resistance(Oak_09_r, drought_years)
+Oak_10_res_f <- resistance(Oak_10_r, drought_years)
+Oak_12_res_f <- resistance(Oak_12_r, drought_years)
+Oak_13_res_f <- resistance(Oak_13_r, drought_years)
+Oak_14_res_f <- resistance(Oak_14_r, drought_years)
+Oak_15_res_f <- resistance(Oak_15_r, drought_years)
+
+
+Oak_01_rsl_f <- resilience(Oak_01_r, drought_years)
+Oak_02_rsl_f <- resilience(Oak_02_r, drought_years)
+Oak_03_rsl_f <- resilience(Oak_03_r, drought_years)
+Oak_04_rsl_f <- resilience(Oak_04_r, drought_years)
+Oak_05_rsl_f <- resilience(Oak_05_r, drought_years)
+Oak_06_rsl_f <- resilience(Oak_06_r, drought_years)
+Oak_07_rsl_f <- resilience(Oak_07_r, drought_years)
+Oak_08_rsl_f <- resilience(Oak_08_r, drought_years)
+Oak_09_rsl_f <- resilience(Oak_09_r, drought_years)
+Oak_10_rsl_f <- resilience(Oak_10_r, drought_years)
+Oak_12_rsl_f <- resilience(Oak_12_r, drought_years)
+Oak_13_rsl_f <- resilience(Oak_13_r, drought_years)
+Oak_14_rsl_f <- resilience(Oak_14_r, drought_years)
+Oak_15_rsl_f <- resilience(Oak_15_r, drought_years)
+
+
+Oak_01_rec_f <- recovery(Oak_01_r, drought_years)
+Oak_02_rec_f <- recovery(Oak_02_r, drought_years)
+Oak_03_rec_f <- recovery(Oak_03_r, drought_years)
+Oak_04_rec_f <- recovery(Oak_04_r, drought_years)
+Oak_05_rec_f <- recovery(Oak_05_r, drought_years)
+Oak_06_rec_f <- recovery(Oak_06_r, drought_years)
+Oak_07_rec_f <- recovery(Oak_07_r, drought_years)
+Oak_08_rec_f <- recovery(Oak_08_r, drought_years)
+Oak_09_rec_f <- recovery(Oak_09_r, drought_years)
+Oak_10_rec_f <- recovery(Oak_10_r, drought_years)
+Oak_12_rec_f <- recovery(Oak_12_r, drought_years)
+Oak_13_rec_f <- recovery(Oak_13_r, drought_years)
+Oak_14_rec_f <- recovery(Oak_14_r, drought_years)
+Oak_15_rec_f <- recovery(Oak_15_r, drought_years)
+
 
 
