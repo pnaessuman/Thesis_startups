@@ -475,5 +475,149 @@ Oak_13_rec_f <- recovery(Oak_13_r, drought_years)
 Oak_14_rec_f <- recovery(Oak_14_r, drought_years)
 Oak_15_rec_f <- recovery(Oak_15_r, drought_years)
 
+####
 
+all_data <- bind_rows(
+  # Beech original data
+  tibble(
+    tree_id = paste0("Beech_", sprintf("%02d", 1:15)),
+    resistance = map(list(Beech_01_res, Beech_02_res, Beech_03_res, Beech_04_res,
+                          Beech_05_res, Beech_06_res, Beech_07_res, Beech_08_res,
+                          Beech_09_res, Beech_10_res, Beech_11_res, Beech_12_res,
+                          Beech_13_res, Beech_14_res, Beech_15_res), ~ .x),
+    resilience = map(list(Beech_01_rsl, Beech_02_rsl, Beech_03_rsl, Beech_04_rsl,
+                          Beech_05_rsl, Beech_06_rsl, Beech_07_rsl, Beech_08_rsl,
+                          Beech_09_rsl, Beech_10_rsl, Beech_11_rsl, Beech_12_rsl,
+                          Beech_13_rsl, Beech_14_rsl, Beech_15_rsl), ~ .x),
+    recovery = map(list(Beech_01_rec, Beech_02_rec, Beech_03_rec, Beech_04_rec,
+                        Beech_05_rec, Beech_06_rec, Beech_07_rec, Beech_08_rec,
+                        Beech_09_rec, Beech_10_rec, Beech_11_rec, Beech_12_rec,
+                        Beech_13_rec, Beech_14_rec, Beech_15_rec), ~ .x)
+  ) %>%
+    pivot_longer(cols = c(resistance, resilience, recovery), 
+                 names_to = "index_type", values_to = "index_data") %>%
+    unnest(index_data) %>%
+    rename(index_value = index) %>%
+    mutate(species = "Beech", data_type = "original"),
+  
+  # Beech forward data
+  tibble(
+    tree_id = paste0("Beech_", sprintf("%02d", 1:15)),
+    resistance = map(list(Beech_01_res_f, Beech_02_res_f, Beech_03_res_f, Beech_04_res_f,
+                          Beech_05_res_f, Beech_06_res_f, Beech_07_res_f, Beech_08_res_f,
+                          Beech_09_res_f, Beech_10_res_f, Beech_11_res_f, Beech_12_res_f,
+                          Beech_13_res_f, Beech_14_res_f, Beech_15_res_f), ~ .x),
+    resilience = map(list(Beech_01_rsl_f, Beech_02_rsl_f, Beech_03_rsl_f, Beech_04_rsl_f,
+                          Beech_05_rsl_f, Beech_06_rsl_f, Beech_07_rsl_f, Beech_08_rsl_f,
+                          Beech_09_rsl_f, Beech_10_rsl_f, Beech_11_rsl_f, Beech_12_rsl_f,
+                          Beech_13_rsl_f, Beech_14_rsl_f, Beech_15_rsl_f), ~ .x),
+    recovery = map(list(Beech_01_rec_f, Beech_02_rec_f, Beech_03_rec_f, Beech_04_rec_f,
+                        Beech_05_rec_f, Beech_06_rec_f, Beech_07_rec_f, Beech_08_rec_f,
+                        Beech_09_rec_f, Beech_10_rec_f, Beech_11_rec_f, Beech_12_rec_f,
+                        Beech_13_rec_f, Beech_14_rec_f, Beech_15_rec_f), ~ .x)
+  ) %>%
+    pivot_longer(cols = c(resistance, resilience, recovery), 
+                 names_to = "index_type", values_to = "index_data") %>%
+    unnest(index_data) %>%
+    rename(index_value = index) %>%
+    mutate(species = "Beech", data_type = "forward"),
+  
+  # Oak original data
+  tibble(
+    tree_id = paste0("Oak_", sprintf("%02d", c(1:10, 12:15))),
+    resistance = map(list(Oak_01_res, Oak_02_res, Oak_03_res, Oak_04_res,
+                          Oak_05_res, Oak_06_res, Oak_07_res, Oak_08_res,
+                          Oak_09_res, Oak_10_res, Oak_12_res, Oak_13_res,
+                          Oak_14_res, Oak_15_res), ~ .x),
+    resilience = map(list(Oak_01_rsl, Oak_02_rsl, Oak_03_rsl, Oak_04_rsl,
+                          Oak_05_rsl, Oak_06_rsl, Oak_07_rsl, Oak_08_rsl,
+                          Oak_09_rsl, Oak_10_rsl, Oak_12_rsl, Oak_13_rsl,
+                          Oak_14_rsl, Oak_15_rsl), ~ .x),
+    recovery = map(list(Oak_01_rec, Oak_02_rec, Oak_03_rec, Oak_04_rec,
+                        Oak_05_rec, Oak_06_rec, Oak_07_rec, Oak_08_rec,
+                        Oak_09_rec, Oak_10_rec, Oak_12_rec, Oak_13_rec,
+                        Oak_14_rec, Oak_15_rec), ~ .x)
+  ) %>%
+    pivot_longer(cols = c(resistance, resilience, recovery), 
+                 names_to = "index_type", values_to = "index_data") %>%
+    unnest(index_data) %>%
+    rename(index_value = index) %>%
+    mutate(species = "Oak", data_type = "original"),
+  
+  # Oak forward data
+  tibble(
+    tree_id = paste0("Oak_", sprintf("%02d", c(1:10, 12:15))),
+    resistance = map(list(Oak_01_res_f, Oak_02_res_f, Oak_03_res_f, Oak_04_res_f,
+                          Oak_05_res_f, Oak_06_res_f, Oak_07_res_f, Oak_08_res_f,
+                          Oak_09_res_f, Oak_10_res_f, Oak_12_res_f, Oak_13_res_f,
+                          Oak_14_res_f, Oak_15_res_f), ~ .x),
+    resilience = map(list(Oak_01_rsl_f, Oak_02_rsl_f, Oak_03_rsl_f, Oak_04_rsl_f,
+                          Oak_05_rsl_f, Oak_06_rsl_f, Oak_07_rsl_f, Oak_08_rsl_f,
+                          Oak_09_rsl_f, Oak_10_rsl_f, Oak_12_rsl_f, Oak_13_rsl_f,
+                          Oak_14_rsl_f, Oak_15_rsl_f), ~ .x),
+    recovery = map(list(Oak_01_rec_f, Oak_02_rec_f, Oak_03_rec_f, Oak_04_rec_f,
+                        Oak_05_rec_f, Oak_06_rec_f, Oak_07_rec_f, Oak_08_rec_f,
+                        Oak_09_rec_f, Oak_10_rec_f, Oak_12_rec_f, Oak_13_rec_f,
+                        Oak_14_rec_f, Oak_15_rec_f), ~ .x)
+  ) %>%
+    pivot_longer(cols = c(resistance, resilience, recovery), 
+                 names_to = "index_type", values_to = "index_data") %>%
+    unnest(index_data) %>%
+    rename(index_value = index) %>%
+    mutate(species = "Oak", data_type = "forward")
+) %>%
+  mutate(
+    drought_year = factor(year),
+    index_type = factor(index_type, levels = c("resistance", "resilience", "recovery")),
+    data_type = factor(data_type, levels = c("original", "forward"))
+  )
 
+# 2. CREATE BOX PLOTS - SIMPLE VERSION
+# Function to create box plots for a specific species and index
+create_boxplot <- function(species_name, index_name) {
+  
+  plot_data <- all_data %>%
+    filter(species == species_name, index_type == index_name)
+  
+  ggplot(plot_data, aes(x = data_type, y = index_value, fill = data_type)) +
+    geom_boxplot(alpha = 0.8, outlier.shape = NA) +
+    geom_jitter(width = 0.2, alpha = 0.6, size = 2, aes(color = data_type)) +
+    facet_wrap(~ drought_year, ncol = 2) +
+    scale_fill_manual(values = c("original" = "#3498db", "forward" = "#e74c3c")) +
+    scale_color_manual(values = c("original" = "#2980b9", "forward" = "#c0392b")) +
+    labs(
+      title = paste(species_name, "-", str_to_title(index_name)),
+      x = "Data Type",
+      y = paste(str_to_title(index_name), "Index"),
+      fill = "Data Type",
+      color = "Data Type"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+      axis.text = element_text(size = 10),
+      axis.title = element_text(size = 12),
+      legend.position = "bottom",
+      strip.text = element_text(size = 11, face = "bold")
+    )
+}
+
+# 3. CREATE ALL BOX PLOTS
+# Beech box plots
+beech_resistance_box <- create_boxplot("Beech", "resistance")
+beech_resilience_box <- create_boxplot("Beech", "resilience")
+beech_recovery_box <- create_boxplot("Beech", "recovery")
+
+# Oak box plots
+oak_resistance_box <- create_boxplot("Oak", "resistance")
+oak_resilience_box <- create_boxplot("Oak", "resilience")
+oak_recovery_box <- create_boxplot("Oak", "recovery")
+
+# 4. DISPLAY ALL PLOTS
+beech_resistance_box
+beech_resilience_box
+beech_recovery_box
+
+oak_resistance_box
+oak_resilience_box
+oak_recovery_box
