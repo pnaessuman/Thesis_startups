@@ -5,6 +5,7 @@ library(tidyverse)
 library(VSLiteR)
 library(ggplot2)
 library(DEoptim)
+library(treeclim)
 
 source("External/Vs.R")
 source("External/lloret_indices.R")
@@ -14,6 +15,9 @@ climate <- read.csv2("Data/climate_bausenberg.csv")[, c(1, 2, 3, 6)]
 
 Beech_d <- detrend(beech, method = "Spline", nyrs = 32)
 Oak_d <- detrend(oak, method = "Spline", nyrs = 32)
+
+Beech_c <- chron(Beech_d)
+Oak_c <- chron(Oak_d )
 
 beech_1 <- Beech_d %>% 
   na.omit()
@@ -621,3 +625,9 @@ beech_recovery_box
 oak_resistance_box
 oak_resilience_box
 oak_recovery_box
+
+Beech_dcc_calib <- dcc(Beech_c, climate) 
+plot(Beech_dcc_calib)
+
+Oak_dcc_calib <- dcc(Oak_c, climate) #you can add some values to it i.e (months of your choice, tittle, etc)
+plot(Oak_dcc_calib)
