@@ -631,3 +631,12 @@ plot(Beech_dcc_calib)
 
 Oak_dcc_calib <- dcc(Oak_c, climate) #you can add some values to it i.e (months of your choice, tittle, etc)
 plot(Oak_dcc_calib)
+
+wilcox.test(beech_resist_1976, oak_resist_1976)
+wilcox.test(beech_recov_1976, oak_recov_1976)
+wilcox.test(beech_resil_1976, oak_resil_1976)
+
+wilcox.test(beech_resist_2003, oak_resist_2003)
+wilcox.test(beech_recov_2003, oak_recov_2003)
+wilcox.test(beech_resil_2003, oak_resil_2003)
+
