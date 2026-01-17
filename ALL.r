@@ -14,15 +14,15 @@ oak <- read.rwl("Data/bausenberg_oak.rwl")
 climate <- read.csv2("Data/climate_bausenberg.csv")[, c(1, 2, 3, 6)]
 
 Beech_d <- detrend(beech, method = "Spline", nyrs = 32)
-Oak_d <- detrend(oak, method = "Spline", nyrs = 32)
+oak_d <- detrend(oak, method = "Spline", nyrs = 32)
 
 Beech_c <- chron(Beech_d)
-Oak_c <- chron(Oak_d )
+Oak_c <- chron(oak_d )
 
-beech_1 <- Beech_d %>% 
+beech_1 <- Beech_c %>% 
   na.omit()
 
-oak_1 <- oak_d %>% 
+oak_1 <- Oak_c %>% 
   na.omit()
 
 beech_1$Beech_05
@@ -626,17 +626,286 @@ oak_resistance_box
 oak_resilience_box
 oak_recovery_box
 
+
+########
+
+input_historic_b <- make_vsinput_historic(Beech_c, climate)
+
+beech_params <- vs_params(input_historic_b$trw,
+                          input_historic_b$tmean,
+                          input_historic_b$prec,
+                          input_historic_b$syear,
+                          input_historic_b$eyear,
+                          .phi = 50) # approx. latitude in degrees
+
+#Run model forward
+input_transient_b <- make_vsinput_transient(climate)
+
+beech_forward <- vs_run_forward(beech_params,
+                                input_transient_b$tmean,
+                                input_transient_b$prec,
+                                input_transient_b$syear,
+                                input_transient_b$eyear,
+                                .phi = 50)
+
+
+#####
+
+input_historic_o <- make_vsinput_historic(Oak_c, climate)
+
+oak_params <- vs_params(input_historic_o$trw,
+                          input_historic_o$tmean,
+                          input_historic_o$prec,
+                          input_historic_o$syear,
+                          input_historic_o$eyear,
+                          .phi = 50) # approx. latitude in degrees
+
+#Run model forward
+input_transient_o <- make_vsinput_transient(climate)
+
+oak_forward <- vs_run_forward(oak_params,
+                                input_transient_o$tmean,
+                                input_transient_o$prec,
+                                input_transient_o$syear,
+                                input_transient_o$eyear,
+                                .phi = 50)
+
 Beech_dcc_calib <- dcc(Beech_c, climate) 
 plot(Beech_dcc_calib)
 
-Oak_dcc_calib <- dcc(Oak_c, climate) #you can add some values to it i.e (months of your choice, tittle, etc)
+# Sometimes dcc() is more robust
+Beech_dcc_forward <- dcc(beech_forward_df, 
+              climate,
+              selection = -6:9,
+              method = "correlation",
+              timespan = c(1901, 2018))
+
+  
+plot(Beech_dcc_forward)
+
+beech_forward_df <- data.frame(trw = beech_forward$trw)
+rownames(beech_forward_df) <- beech_forward$year
+
+Oak_dcc_calib <- dcc(Oak_c, climate) 
 plot(Oak_dcc_calib)
 
-wilcox.test(beech_resist_1976, oak_resist_1976)
-wilcox.test(beech_recov_1976, oak_recov_1976)
-wilcox.test(beech_resil_1976, oak_resil_1976)
+oak_forward_df <- data.frame(trw = oak_forward$trw)
+rownames(oak_forward_df) <- oak_forward$year
+  
+Oak_dcc_forward <- dcc(oak_forward_df, 
+                         climate,
+                         selection = -6:9,
+                         method = "correlation",
+                         timespan = c(1901, 2018))
+plot(Oak_dcc_forward)
 
-wilcox.test(beech_resist_2003, oak_resist_2003)
-wilcox.test(beech_recov_2003, oak_recov_2003)
-wilcox.test(beech_resil_2003, oak_resil_2003)
+#Beech Resistance 1976 p-value
 
+wilcox.test(
+  c(Beech_01_res[1,"index"], Beech_02_res[1,"index"], Beech_03_res[1,"index"],
+    Beech_04_res[1,"index"], Beech_05_res[1,"index"], Beech_06_res[1,"index"],
+    Beech_07_res[1,"index"], Beech_08_res[1,"index"], Beech_09_res[1,"index"],
+    Beech_10_res[1,"index"], Beech_11_res[1,"index"], Beech_12_res[1,"index"],
+    Beech_13_res[1,"index"], Beech_14_res[1,"index"], Beech_15_res[1,"index"]),
+  
+  c(Beech_01_res_f[1,"index"], Beech_02_res_f[1,"index"], Beech_03_res_f[1,"index"],
+    Beech_04_res_f[1,"index"], Beech_05_res_f[1,"index"], Beech_06_res_f[1,"index"],
+    Beech_07_res_f[1,"index"], Beech_08_res_f[1,"index"], Beech_09_res_f[1,"index"],
+    Beech_10_res_f[1,"index"], Beech_11_res_f[1,"index"], Beech_12_res_f[1,"index"],
+    Beech_13_res_f[1,"index"], Beech_14_res_f[1,"index"], Beech_15_res_f[1,"index"]),
+  paired = FALSE
+)$p.value
+
+
+#Beech Resistance 2003 p-value
+
+wilcox.test(
+  c(Beech_01_res[2,"index"], Beech_02_res[2,"index"], Beech_03_res[2,"index"],
+    Beech_04_res[2,"index"], Beech_05_res[2,"index"], Beech_06_res[2,"index"],
+    Beech_07_res[2,"index"], Beech_08_res[2,"index"], Beech_09_res[2,"index"],
+    Beech_10_res[2,"index"], Beech_11_res[2,"index"], Beech_12_res[2,"index"],
+    Beech_13_res[2,"index"], Beech_14_res[2,"index"], Beech_15_res[2,"index"]),
+  
+  c(Beech_01_res_f[2,"index"], Beech_02_res_f[2,"index"], Beech_03_res_f[2,"index"],
+    Beech_04_res_f[2,"index"], Beech_05_res_f[2,"index"], Beech_06_res_f[2,"index"],
+    Beech_07_res_f[2,"index"], Beech_08_res_f[2,"index"], Beech_09_res_f[2,"index"],
+    Beech_10_res_f[2,"index"], Beech_11_res_f[2,"index"], Beech_12_res_f[2,"index"],
+    Beech_13_res_f[2,"index"], Beech_14_res_f[2,"index"], Beech_15_res_f[2,"index"]),
+  paired = FALSE
+)$p.value
+
+
+#Beech Resilience 1976 p-value
+
+wilcox.test(
+  c(Beech_01_rsl[1,"index"], Beech_02_rsl[1,"index"], Beech_03_rsl[1,"index"],
+    Beech_04_rsl[1,"index"], Beech_05_rsl[1,"index"], Beech_06_rsl[1,"index"],
+    Beech_07_rsl[1,"index"], Beech_08_rsl[1,"index"], Beech_09_rsl[1,"index"],
+    Beech_10_rsl[1,"index"], Beech_11_rsl[1,"index"], Beech_12_rsl[1,"index"],
+    Beech_13_rsl[1,"index"], Beech_14_rsl[1,"index"], Beech_15_rsl[1,"index"]),
+  
+  c(Beech_01_rsl_f[1,"index"], Beech_02_rsl_f[1,"index"], Beech_03_rsl_f[1,"index"],
+    Beech_04_rsl_f[1,"index"], Beech_05_rsl_f[1,"index"], Beech_06_rsl_f[1,"index"],
+    Beech_07_rsl_f[1,"index"], Beech_08_rsl_f[1,"index"], Beech_09_rsl_f[1,"index"],
+    Beech_10_rsl_f[1,"index"], Beech_11_rsl_f[1,"index"], Beech_12_rsl_f[1,"index"],
+    Beech_13_rsl_f[1,"index"], Beech_14_rsl_f[1,"index"], Beech_15_rsl_f[1,"index"]),
+  paired = FALSE
+)$p.value
+
+
+#Beech Resilience 2003 p-value
+
+wilcox.test(
+  c(Beech_01_rsl[2,"index"], Beech_02_rsl[2,"index"], Beech_03_rsl[2,"index"],
+    Beech_04_rsl[2,"index"], Beech_05_rsl[2,"index"], Beech_06_rsl[2,"index"],
+    Beech_07_rsl[2,"index"], Beech_08_rsl[2,"index"], Beech_09_rsl[2,"index"],
+    Beech_10_rsl[2,"index"], Beech_11_rsl[2,"index"], Beech_12_rsl[2,"index"],
+    Beech_13_rsl[2,"index"], Beech_14_rsl[2,"index"], Beech_15_rsl[2,"index"]),
+  
+  c(Beech_01_rsl_f[2,"index"], Beech_02_rsl_f[2,"index"], Beech_03_rsl_f[2,"index"],
+    Beech_04_rsl_f[2,"index"], Beech_05_rsl_f[2,"index"], Beech_06_rsl_f[2,"index"],
+    Beech_07_rsl_f[2,"index"], Beech_08_rsl_f[2,"index"], Beech_09_rsl_f[2,"index"],
+    Beech_10_rsl_f[2,"index"], Beech_11_rsl_f[2,"index"], Beech_12_rsl_f[2,"index"],
+    Beech_13_rsl_f[2,"index"], Beech_14_rsl_f[2,"index"], Beech_15_rsl_f[2,"index"]),
+  paired = FALSE
+)$p.value
+
+#Beech Recovery 1976 p-value
+
+wilcox.test(
+  c(Beech_01_rec[1,"index"], Beech_02_rec[1,"index"], Beech_03_rec[1,"index"],
+    Beech_04_rec[1,"index"], Beech_05_rec[1,"index"], Beech_06_rec[1,"index"],
+    Beech_07_rec[1,"index"], Beech_08_rec[1,"index"], Beech_09_rec[1,"index"],
+    Beech_10_rec[1,"index"], Beech_11_rec[1,"index"], Beech_12_rec[1,"index"],
+    Beech_13_rec[1,"index"], Beech_14_rec[1,"index"], Beech_15_rec[1,"index"]),
+  
+  c(Beech_01_rec_f[1,"index"], Beech_02_rec_f[1,"index"], Beech_03_rec_f[1,"index"],
+    Beech_04_rec_f[1,"index"], Beech_05_rec_f[1,"index"], Beech_06_rec_f[1,"index"],
+    Beech_07_rec_f[1,"index"], Beech_08_rec_f[1,"index"], Beech_09_rec_f[1,"index"],
+    Beech_10_rec_f[1,"index"], Beech_11_rec_f[1,"index"], Beech_12_rec_f[1,"index"],
+    Beech_13_rec_f[1,"index"], Beech_14_rec_f[1,"index"], Beech_15_rec_f[1,"index"]),
+  paired = FALSE
+)$p.value
+
+#Beech Recovery 2003 p-value
+
+wilcox.test(
+  c(Beech_01_rec[2,"index"], Beech_02_rec[2,"index"], Beech_03_rec[2,"index"],
+    Beech_04_rec[2,"index"], Beech_05_rec[2,"index"], Beech_06_rec[2,"index"],
+    Beech_07_rec[2,"index"], Beech_08_rec[2,"index"], Beech_09_rec[2,"index"],
+    Beech_10_rec[2,"index"], Beech_11_rec[2,"index"], Beech_12_rec[2,"index"],
+    Beech_13_rec[2,"index"], Beech_14_rec[2,"index"], Beech_15_rec[2,"index"]),
+  
+  c(Beech_01_rec_f[2,"index"], Beech_02_rec_f[2,"index"], Beech_03_rec_f[2,"index"],
+    Beech_04_rec_f[2,"index"], Beech_05_rec_f[2,"index"], Beech_06_rec_f[2,"index"],
+    Beech_07_rec_f[2,"index"], Beech_08_rec_f[2,"index"], Beech_09_rec_f[2,"index"],
+    Beech_10_rec_f[2,"index"], Beech_11_rec_f[2,"index"], Beech_12_rec_f[2,"index"],
+    Beech_13_rec_f[2,"index"], Beech_14_rec_f[2,"index"], Beech_15_rec_f[2,"index"]),
+  paired = FALSE
+)$p.value
+
+#Oak Resistance 1976 p-value
+
+wilcox.test(
+  c(Oak_01_res[1,"index"], Oak_02_res[1,"index"], Oak_03_res[1,"index"],
+    Oak_04_res[1,"index"], Oak_05_res[1,"index"], Oak_06_res[1,"index"],
+    Oak_07_res[1,"index"], Oak_08_res[1,"index"], Oak_09_res[1,"index"],
+    Oak_10_res[1,"index"], Oak_12_res[1,"index"], Oak_13_res[1,"index"],
+    Oak_14_res[1,"index"], Oak_15_res[1,"index"]),
+  
+  c(Oak_01_res_f[1,"index"], Oak_02_res_f[1,"index"], Oak_03_res_f[1,"index"],
+    Oak_04_res_f[1,"index"], Oak_05_res_f[1,"index"], Oak_06_res_f[1,"index"],
+    Oak_07_res_f[1,"index"], Oak_08_res_f[1,"index"], Oak_09_res_f[1,"index"],
+    Oak_10_res_f[1,"index"], Oak_12_res_f[1,"index"], Oak_13_res_f[1,"index"],
+    Oak_14_res_f[1,"index"], Oak_15_res_f[1,"index"]),
+  paired = FALSE
+)$p.value
+
+# Oak Resistance 2003 p-value
+
+wilcox.test(
+  c(Oak_01_res[2,"index"], Oak_02_res[2,"index"], Oak_03_res[2,"index"],
+    Oak_04_res[2,"index"], Oak_05_res[2,"index"], Oak_06_res[2,"index"],
+    Oak_07_res[2,"index"], Oak_08_res[2,"index"], Oak_09_res[2,"index"],
+    Oak_10_res[2,"index"], Oak_12_res[2,"index"], Oak_13_res[2,"index"],
+    Oak_14_res[2,"index"], Oak_15_res[2,"index"]),
+  
+  c(Oak_01_res_f[2,"index"], Oak_02_res_f[2,"index"], Oak_03_res_f[2,"index"],
+    Oak_04_res_f[2,"index"], Oak_05_res_f[2,"index"], Oak_06_res_f[2,"index"],
+    Oak_07_res_f[2,"index"], Oak_08_res_f[2,"index"], Oak_09_res_f[2,"index"],
+    Oak_10_res_f[2,"index"], Oak_12_res_f[2,"index"], Oak_13_res_f[2,"index"],
+    Oak_14_res_f[2,"index"], Oak_15_res_f[2,"index"]),
+  paired = FALSE
+)$p.value
+
+
+# Oak Resilience 1976 p-value
+
+wilcox.test(
+  c(Oak_01_rsl[1,"index"], Oak_02_rsl[1,"index"], Oak_03_rsl[1,"index"],
+    Oak_04_rsl[1,"index"], Oak_05_rsl[1,"index"], Oak_06_rsl[1,"index"],
+    Oak_07_rsl[1,"index"], Oak_08_rsl[1,"index"], Oak_09_rsl[1,"index"],
+    Oak_10_rsl[1,"index"], Oak_12_rsl[1,"index"], Oak_13_rsl[1,"index"],
+    Oak_14_rsl[1,"index"], Oak_15_rsl[1,"index"]),
+  
+  c(Oak_01_rsl_f[1,"index"], Oak_02_rsl_f[1,"index"], Oak_03_rsl_f[1,"index"],
+    Oak_04_rsl_f[1,"index"], Oak_05_rsl_f[1,"index"], Oak_06_rsl_f[1,"index"],
+    Oak_07_rsl_f[1,"index"], Oak_08_rsl_f[1,"index"], Oak_09_rsl_f[1,"index"],
+    Oak_10_rsl_f[1,"index"], Oak_12_rsl_f[1,"index"], Oak_13_rsl_f[1,"index"],
+    Oak_14_rsl_f[1,"index"], Oak_15_rsl_f[1,"index"]),
+  paired = FALSE
+)$p.value
+
+
+# Oak Resilience 2003 p-value
+
+wilcox.test(
+  c(Oak_01_rsl[2,"index"], Oak_02_rsl[2,"index"], Oak_03_rsl[2,"index"],
+    Oak_04_rsl[2,"index"], Oak_05_rsl[2,"index"], Oak_06_rsl[2,"index"],
+    Oak_07_rsl[2,"index"], Oak_08_rsl[2,"index"], Oak_09_rsl[2,"index"],
+    Oak_10_rsl[2,"index"], Oak_12_rsl[2,"index"], Oak_13_rsl[2,"index"],
+    Oak_14_rsl[2,"index"], Oak_15_rsl[2,"index"]),
+  
+  c(Oak_01_rsl_f[2,"index"], Oak_02_rsl_f[2,"index"], Oak_03_rsl_f[2,"index"],
+    Oak_04_rsl_f[2,"index"], Oak_05_rsl_f[2,"index"], Oak_06_rsl_f[2,"index"],
+    Oak_07_rsl_f[2,"index"], Oak_08_rsl_f[2,"index"], Oak_09_rsl_f[2,"index"],
+    Oak_10_rsl_f[2,"index"], Oak_12_rsl_f[2,"index"], Oak_13_rsl_f[2,"index"],
+    Oak_14_rsl_f[2,"index"], Oak_15_rsl_f[2,"index"]),
+  paired = FALSE
+)$p.value
+
+
+# Oak Recovery 1976 p-value
+
+wilcox.test(
+  c(Oak_01_rec[1,"index"], Oak_02_rec[1,"index"], Oak_03_rec[1,"index"],
+    Oak_04_rec[1,"index"], Oak_05_rec[1,"index"], Oak_06_rec[1,"index"],
+    Oak_07_rec[1,"index"], Oak_08_rec[1,"index"], Oak_09_rec[1,"index"],
+    Oak_10_rec[1,"index"], Oak_12_rec[1,"index"], Oak_13_rec[1,"index"],
+    Oak_14_rec[1,"index"], Oak_15_rec[1,"index"]),
+  
+  c(Oak_01_rec_f[1,"index"], Oak_02_rec_f[1,"index"], Oak_03_rec_f[1,"index"],
+    Oak_04_rec_f[1,"index"], Oak_05_rec_f[1,"index"], Oak_06_rec_f[1,"index"],
+    Oak_07_rec_f[1,"index"], Oak_08_rec_f[1,"index"], Oak_09_rec_f[1,"index"],
+    Oak_10_rec_f[1,"index"], Oak_12_rec_f[1,"index"], Oak_13_rec_f[1,"index"],
+    Oak_14_rec_f[1,"index"], Oak_15_rec_f[1,"index"]),
+  paired = FALSE
+)$p.value
+
+
+# Oak Recovery 2003 p-value
+
+wilcox.test(
+  c(Oak_01_rec[2,"index"], Oak_02_rec[2,"index"], Oak_03_rec[2,"index"],
+    Oak_04_rec[2,"index"], Oak_05_rec[2,"index"], Oak_06_rec[2,"index"],
+    Oak_07_rec[2,"index"], Oak_08_rec[2,"index"], Oak_09_rec[2,"index"],
+    Oak_10_rec[2,"index"], Oak_12_rec[2,"index"], Oak_13_rec[2,"index"],
+    Oak_14_rec[2,"index"], Oak_15_rec[2,"index"]),
+  
+  c(Oak_01_rec_f[2,"index"], Oak_02_rec_f[2,"index"], Oak_03_rec_f[2,"index"],
+    Oak_04_rec_f[2,"index"], Oak_05_rec_f[2,"index"], Oak_06_rec_f[2,"index"],
+    Oak_07_rec_f[2,"index"], Oak_08_rec_f[2,"index"], Oak_09_rec_f[2,"index"],
+    Oak_10_rec_f[2,"index"], Oak_12_rec_f[2,"index"], Oak_13_rec_f[2,"index"],
+    Oak_14_rec_f[2,"index"], Oak_15_rec_f[2,"index"]),
+  paired = FALSE
+)$p.value
